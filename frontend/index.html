@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindChain - Chat Interface</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1> MindChain Router</h1>
+            <p class="subtitle">Intelligent LLM routing system</p>
+            <div class="header-controls">
+                <input type="text" id="apiUrl" placeholder="API URL (e.g., http://localhost:8000)" value="http://localhost:8000">
+                <button id="connectBtn" class="btn btn-secondary">Connect</button>
+                <button id="modelsBtn" class="btn btn-secondary">Load Models</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>Chat</h2>
+                    <div class="chat-controls">
+                        <label>
+                            <input type="checkbox" id="streamToggle"> Stream Response
+                        </label>
+                        <button id="clearBtn" class="btn btn-small">Clear</button>
+                    </div>
+                </div>
+                
+                <div id="chatMessages" class="chat-messages">
+                    <div class="welcome-message">
+                        <p>👋 Welcome to MindChain!</p>
+                        <p>Start a conversation by typing a message below.</p>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <textarea 
+                        id="messageInput" 
+                        placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+                        rows="3"
+                    ></textarea>
+                    <button id="sendBtn" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h3>Model Info</h3>
+                    <div id="modelInfo" class="model-info">
+                        <p class="info-placeholder">No model selected yet</p>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Available Models</h3>
+                    <div id="modelsList" class="models-list">
+                        <p class="info-placeholder">Click "Load Models" to see available models</p>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>System Status</h3>
+                    <div id="systemStatus" class="status-info">
+                        <p class="info-placeholder">Checking...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

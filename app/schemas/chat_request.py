@@ -12,11 +12,6 @@ class ChatRequest(BaseModel):
         "json_schema_extra": {
             "example": {
                 "message": "Write a Python function to sort a list",
-                "context": "coding",
-                "preferences": {
-                    "speed": "fast",
-                    "cost": "low"
-                },
                 "conversation_id": "conv_123",
                 "stream": False
             }
@@ -28,17 +23,6 @@ class ChatRequest(BaseModel):
         min_length=1,
         max_length=10000,
         description="The user's message or prompt"
-    )
-    
-    context: Optional[str] = Field(
-        None,
-        max_length=5000,
-        description="Optional context about the request"
-    )
-    
-    preferences: Optional[Dict[str, Any]] = Field(
-        None,
-        description="User preferences for model selection (speed, cost, quality)"
     )
     
     conversation_id: Optional[str] = Field(

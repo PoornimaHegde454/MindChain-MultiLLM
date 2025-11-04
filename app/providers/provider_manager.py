@@ -35,6 +35,15 @@ class ProviderManager:
             else:
                 logger.warning("Hugging Face API key not found, skipping Hugging Face provider")
             
+            # Initialize GitHub Models client (optional)
+            if settings.GITHUB_MODELS_API_KEY:
+                try:
+                    from app.providers.github_models_client import GitHubModelsClient
+                    self.providers["github"] = GitHubModelsClient()
+                    logger.info("GitHub Models provider initialized")
+                except Exception as e:
+                    logger.warning(f"GitHub Models provider initialization failed: {str(e)}")
+            
         except Exception as e:
             logger.error(f"Error initializing providers: {str(e)}")
     
@@ -107,6 +116,15 @@ class ProviderManager:
             # Handle actual API model names
             "llama-3.1-8b-instant": "groq",
             "llama-3.1-70b-versatile": "groq",
+            "llama-3.3-70b-versatile": "groq",
+            "llama-guard-4-12b": "groq",
+            "meta-llama/llama-guard-4-12b": "groq",
+            "gpt-oss-120b": "groq",
+            "openai/gpt-oss-120b": "groq",
+            "gpt-oss-20b": "groq",
+            "openai/gpt-oss-20b": "groq",
+            "whisper-large-v3": "groq",
+            "whisper-large-v3-turbo": "groq",
             "mixtral-8x7b-32768": "groq"
         }
         

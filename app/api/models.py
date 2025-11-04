@@ -22,8 +22,21 @@ async def get_available_models():
         List of available models with their characteristics
     """
     try:
-        # Get models from provider manager
-        models = await routing_engine.provider_manager.get_available_models()
+        # Get models from model selector (includes all configured models)
+        models = await routing_engine.model_selector.get_available_models()
+        
+        # Also get models from providers to check availability
+        provider_models = await routing_engine.provider_manager.get_available_models()
+        provider_model_ids = {m.get("id") or m.get("name") for m in provider_models}
+        
+        # Enhance model info with availability status
+        for model in models:
+            model_id = model["name"]
+            # Check if model is available from provider
+            model["available"] = model_id in provider_model_ids or any(
+                model_id in (pm.get("id") or pm.get("name", "")) for pm in provider_models
+            )
+        
         return {
             "models": models,
             "total_count": len(models),

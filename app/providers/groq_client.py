@@ -37,7 +37,18 @@ class GroqClient(BaseProvider):
             # Map our internal model names to Groq model names
             groq_models = {
                 "llama-3.1-8b": "llama-3.1-8b-instant",
+                "llama-3.1-8b-instant": "llama-3.1-8b-instant",
                 "llama-3.1-70b": "llama-3.1-70b-versatile",
+                "llama-3.1-70b-versatile": "llama-3.1-70b-versatile",
+                "llama-3.3-70b-versatile": "llama-3.3-70b-versatile",
+                "llama-guard-4-12b": "meta-llama/llama-guard-4-12b",
+                "meta-llama/llama-guard-4-12b": "meta-llama/llama-guard-4-12b",
+                "gpt-oss-120b": "openai/gpt-oss-120b",
+                "openai/gpt-oss-120b": "openai/gpt-oss-120b",
+                "gpt-oss-20b": "openai/gpt-oss-20b",
+                "openai/gpt-oss-20b": "openai/gpt-oss-20b",
+                "whisper-large-v3": "whisper-large-v3",
+                "whisper-large-v3-turbo": "whisper-large-v3-turbo",
                 "mixtral-8x7b": "mixtral-8x7b-32768"
             }
             
@@ -110,7 +121,8 @@ class GroqClient(BaseProvider):
                 
                 for model in data.get("data", []):
                     model_id = model.get("id", "")
-                    if any(x in model_id for x in ["llama-3.1", "mixtral"]):
+                    # Include all Groq models: llama, mixtral, gpt-oss, whisper, llama-guard
+                    if any(x in model_id for x in ["llama", "mixtral", "gpt-oss", "whisper"]):
                         models.append({
                             "id": model_id,
                             "name": model_id,
@@ -134,6 +146,14 @@ class GroqClient(BaseProvider):
                 "cost": "low",
                 "quality": "very_good"
             }
+        elif "llama-3.3-70b" in model_id:
+            return {
+                "domains": ["general", "creative", "coding", "technical"],
+                "complexity": ["low", "medium", "high"],
+                "speed": "medium",
+                "cost": "high",
+                "quality": "excellent"
+            }
         elif "llama-3.1-70b" in model_id:
             return {
                 "domains": ["general", "creative", "coding", "technical"],
@@ -141,6 +161,40 @@ class GroqClient(BaseProvider):
                 "speed": "medium",
                 "cost": "high",
                 "quality": "excellent"
+            }
+        elif "llama-guard" in model_id or "guard-4" in model_id:
+            return {
+                "domains": ["security", "safety", "content-moderation"],
+                "complexity": ["low", "medium", "high"],
+                "speed": "very_fast",
+                "cost": "medium",
+                "quality": "very_good",
+                "max_completion_tokens": 1024
+            }
+        elif "gpt-oss-120b" in model_id:
+            return {
+                "domains": ["general", "creative", "coding", "technical"],
+                "complexity": ["medium", "high"],
+                "speed": "medium",
+                "cost": "medium",
+                "quality": "excellent"
+            }
+        elif "gpt-oss-20b" in model_id:
+            return {
+                "domains": ["general", "creative", "coding", "technical"],
+                "complexity": ["low", "medium", "high"],
+                "speed": "fast",
+                "cost": "low",
+                "quality": "very_good"
+            }
+        elif "whisper" in model_id:
+            return {
+                "domains": ["audio", "transcription", "speech-to-text"],
+                "complexity": ["low", "medium", "high"],
+                "speed": "medium",
+                "cost": "low",
+                "quality": "excellent",
+                "type": "audio_transcription"
             }
         elif "mixtral" in model_id:
             return {
