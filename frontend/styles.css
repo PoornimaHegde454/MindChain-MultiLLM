@@ -207,9 +207,17 @@ body {
     gap: 12px;
 }
 
+.input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+}
+
 #messageInput {
     flex: 1;
     padding: 12px 16px;
+    padding-right: 50px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 14px;
@@ -221,6 +229,47 @@ body {
 
 #messageInput:focus {
     border-color: var(--primary-color);
+}
+
+.btn-speech {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    padding: 8px 12px;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-speech:hover {
+    background: var(--border-color);
+    transform: scale(1.05);
+}
+
+.btn-speech.recording {
+    background: var(--error-color);
+    color: white;
+    border-color: var(--error-color);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.mic-icon {
+    font-size: 18px;
+    line-height: 1;
 }
 
 .sidebar {

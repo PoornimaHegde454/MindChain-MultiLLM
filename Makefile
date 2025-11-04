@@ -1,14 +1,15 @@
-.PHONY: init run load-models run-backend run-frontend stop
+.PHONY: init run load-models run-backend run-frontend stop kill-ports
 
 # Default target
 .DEFAULT_GOAL := help
 
 # Variables
-VENV := venv
+VENV := .venv
 PYTHON := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 BACKEND_PORT := 8000
 FRONTEND_PORT := 1000
+REDIS_PORT := 6379
 
 # Initialize project: create venv, install dependencies, setup .env
 init:
@@ -29,13 +30,10 @@ init:
 	fi
 	@echo "✅ Initialization complete!"
 
-# Run both backend and frontend
+# Run both backend and frontend in separate threads
 run:
-	@echo "🚀 Starting MultiLLM servers..."
-	@echo "📊 Backend will run on http://localhost:$(BACKEND_PORT)"
-	@echo "🌐 Frontend will run on http://localhost:$(FRONTEND_PORT)"
-	@echo ""
-	@bash -c '$(PYTHON) main.py & cd frontend && $(PYTHON) server.py & echo "✅ Both servers started!" && echo "🛑 Press Ctrl+C to stop both servers" && trap "kill 0" EXIT; wait'
+	@echo "🚀 Starting MultiLLM servers in separate threads..."
+	@$(PYTHON) run_servers.py
 
 # Run backend server
 run-backend:
@@ -58,7 +56,22 @@ stop:
 	@echo "🛑 Stopping servers..."
 	@-lsof -ti:$(BACKEND_PORT) | xargs kill -9 2>/dev/null || true
 	@-lsof -ti:$(FRONTEND_PORT) | xargs kill -9 2>/dev/null || true
+	@-lsof -ti:$(REDIS_PORT) | xargs kill -9 2>/dev/null || true
 	@echo "✅ Servers stopped!"
+
+# Kill all processes on application ports (backend, frontend, redis)
+kill-ports:
+	@echo "🔪 Killing processes on ports $(BACKEND_PORT), $(FRONTEND_PORT), and $(REDIS_PORT)..."
+	@-for port in $(BACKEND_PORT) $(FRONTEND_PORT) $(REDIS_PORT); do \
+		pid=$$(lsof -ti:$$port 2>/dev/null); \
+		if [ ! -z "$$pid" ]; then \
+			echo "   Killing process $$pid on port $$port"; \
+			kill -9 $$pid 2>/dev/null || true; \
+		else \
+			echo "   Port $$port is already free"; \
+		fi; \
+	done
+	@echo "✅ All ports checked and cleared!"
 
 # Help target
 help:
@@ -73,5 +86,6 @@ help:
 	@echo "  run-frontend - Run only frontend server"
 	@echo "  load-models  - Load working models configuration"
 	@echo "  stop         - Stop all running servers"
+	@echo "  kill-ports   - Kill all processes on ports 8000, 1000, and 6379"
 	@echo "  help         - Show this help message"
 

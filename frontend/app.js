@@ -4,6 +4,8 @@ class MultiLLMChat {
         this.apiUrl = 'http://localhost:8000';
         this.currentConversationId = null;
         this.availableModels = [];
+        this.recognition = null;
+        this.isRecording = false;
         
         this.init();
     }
@@ -21,6 +23,7 @@ class MultiLLMChat {
         const connectBtn = document.getElementById('connectBtn');
         const modelsBtn = document.getElementById('modelsBtn');
         const apiUrlInput = document.getElementById('apiUrl');
+        const speechBtn = document.getElementById('speechBtn');
 
         sendBtn.addEventListener('click', () => this.sendMessage());
         
@@ -40,6 +43,10 @@ class MultiLLMChat {
             this.saveApiUrl();
             this.checkHealth();
         });
+
+        // Initialize speech recognition
+        this.initSpeechRecognition();
+        speechBtn.addEventListener('click', () => this.toggleSpeechRecognition());
     }
 
     saveApiUrl() {
@@ -420,6 +427,100 @@ class MultiLLMChat {
         `;
         this.currentConversationId = null;
         document.getElementById('modelInfo').innerHTML = '<p class="info-placeholder">No model selected yet</p>';
+    }
+
+    initSpeechRecognition() {
+        // Check if browser supports speech recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            const speechBtn = document.getElementById('speechBtn');
+            speechBtn.disabled = true;
+            speechBtn.title = 'Speech recognition not supported in this browser';
+            speechBtn.style.opacity = '0.5';
+            speechBtn.style.cursor = 'not-allowed';
+            return;
+        }
+
+        this.recognition = new SpeechRecognition();
+        this.recognition.continuous = true;
+        this.recognition.interimResults = true;
+        this.recognition.lang = 'en-US';
+
+        this.recognition.onstart = () => {
+            this.isRecording = true;
+            const speechBtn = document.getElementById('speechBtn');
+            speechBtn.classList.add('recording');
+            speechBtn.title = 'Click to stop recording';
+        };
+
+        this.recognition.onend = () => {
+            this.isRecording = false;
+            const speechBtn = document.getElementById('speechBtn');
+            speechBtn.classList.remove('recording');
+            speechBtn.title = 'Speech to Text';
+        };
+
+        this.recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            this.isRecording = false;
+            const speechBtn = document.getElementById('speechBtn');
+            speechBtn.classList.remove('recording');
+            speechBtn.title = 'Speech to Text';
+            
+            let errorMessage = 'Speech recognition error';
+            if (event.error === 'no-speech') {
+                errorMessage = 'No speech detected. Please try again.';
+            } else if (event.error === 'not-allowed') {
+                errorMessage = 'Microphone permission denied. Please enable microphone access.';
+            } else if (event.error === 'network') {
+                errorMessage = 'Network error. Please check your connection.';
+            }
+            
+            this.addMessage('assistant', `⚠️ ${errorMessage}`, null, true);
+        };
+
+        this.recognition.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+
+            const messageInput = document.getElementById('messageInput');
+            const currentText = messageInput.value;
+            
+            // Update input with final transcript
+            if (finalTranscript) {
+                messageInput.value = currentText.trim() + ' ' + finalTranscript.trim();
+                messageInput.focus();
+                // Auto-scroll textarea to bottom
+                messageInput.scrollTop = messageInput.scrollHeight;
+            }
+        };
+    }
+
+    toggleSpeechRecognition() {
+        if (!this.recognition) {
+            return;
+        }
+
+        if (this.isRecording) {
+            this.recognition.stop();
+        } else {
+            try {
+                this.recognition.start();
+            } catch (error) {
+                console.error('Failed to start speech recognition:', error);
+                this.addMessage('assistant', '⚠️ Failed to start speech recognition. Please try again.', null, true);
+            }
+        }
     }
 }
 
